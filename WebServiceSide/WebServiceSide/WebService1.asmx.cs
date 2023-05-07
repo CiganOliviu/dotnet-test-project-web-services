@@ -1,4 +1,6 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Web.Services;
 
 namespace WebServiceSide
@@ -19,6 +21,60 @@ namespace WebServiceSide
             };
 
             return connection;
+        }
+
+        [WebMethod]
+        public void AddDataInProjectTable(SqlConnection connection, string projectName)
+        {
+            string query = "INSERT INTO Project (name, created_at) VALUES (@name, @created_at)";
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@name", projectName); // Replace with your actual parameter values
+                command.Parameters.AddWithValue("@Value2", DateTime.Now.ToString());
+
+                int rowsAffected = command.ExecuteNonQuery();
+
+                Console.WriteLine($"Rows affected: {rowsAffected}");
+            }
+        }
+
+        [WebMethod]
+        public List<string> GetAllProjectsByName(SqlConnection connection)
+        {
+            string query = "SELECT Name FROM Project";
+            connection.Open();
+            List<string> result = new List<string>();
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string name = reader.GetString(0); 
+                        result.Add(name);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        [WebMethod]
+        public void DeleteDataInProjectTableById(SqlConnection connection, int id)
+        {
+            string query = "DELETE FROM Project WHERE Id = @Id";
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@Id", id);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                Console.WriteLine($"Rows affected: {rowsAffected}");
+            }
         }
     }
 }
